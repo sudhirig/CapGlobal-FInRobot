@@ -37,5 +37,5 @@ setup(
     ],
     keywords="Financial Large Language Models, AI Agents",
     platforms=["any"],
-    python_requires=">=3.10, <3.12",
+    python_requires=">=3.10, <3.13",
 )
