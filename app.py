@@ -1101,6 +1101,19 @@ elif page == "📄 Reports":
                     mcap = info.get('marketCap', 0)
                     mcap_str = f"${mcap/1e12:.2f}T" if mcap >= 1e12 else f"${mcap/1e9:.2f}B"
                     
+                    # Format metrics with proper handling of None/missing values
+                    trailing_pe = info.get('trailingPE')
+                    trailing_pe_str = f"{trailing_pe:.1f}" if isinstance(trailing_pe, (int, float)) else 'N/A'
+                    
+                    forward_pe = info.get('forwardPE')
+                    forward_pe_str = f"{forward_pe:.1f}" if isinstance(forward_pe, (int, float)) else 'N/A'
+                    
+                    peg_ratio = info.get('pegRatio')
+                    peg_ratio_str = f"{peg_ratio:.2f}" if isinstance(peg_ratio, (int, float)) else 'N/A'
+                    
+                    beta = info.get('beta')
+                    beta_str = f"{beta:.2f}" if isinstance(beta, (int, float)) else 'N/A'
+                    
                     # Generate report
                     report = f"""# {info.get('longName', ticker)} ({ticker})
 ## Equity Research Report
@@ -1115,13 +1128,13 @@ elif page == "📄 Reports":
 |--------|-------|
 | Current Price | **${price:.2f}** |
 | Market Cap | {mcap_str} |
-| PE Ratio (TTM) | {info.get('trailingPE', 'N/A'):.1f if isinstance(info.get('trailingPE'), (int, float)) else 'N/A'} |
-| Forward PE | {info.get('forwardPE', 'N/A'):.1f if isinstance(info.get('forwardPE'), (int, float)) else 'N/A'} |
-| PEG Ratio | {info.get('pegRatio', 'N/A'):.2f if isinstance(info.get('pegRatio'), (int, float)) else 'N/A'} |
+| PE Ratio (TTM) | {trailing_pe_str} |
+| Forward PE | {forward_pe_str} |
+| PEG Ratio | {peg_ratio_str} |
 | Dividend Yield | {(info.get('dividendYield', 0) or 0)*100:.2f}% |
 | 52-Week High | ${info.get('fiftyTwoWeekHigh', 0):.2f} |
 | 52-Week Low | ${info.get('fiftyTwoWeekLow', 0):.2f} |
-| Beta | {info.get('beta', 'N/A'):.2f if isinstance(info.get('beta'), (int, float)) else 'N/A'} |
+| Beta | {beta_str} |
 | Avg Volume | {info.get('averageVolume', 0):,.0f} |
 
 ---
@@ -1137,7 +1150,7 @@ elif page == "📄 Reports":
 ## 💡 Investment Highlights
 
 Based on current metrics:
-- **Valuation:** {"Reasonable" if info.get('trailingPE', 100) < 25 else "Premium"} PE of {info.get('trailingPE', 0):.1f}x
+- **Valuation:** {"Reasonable" if (isinstance(trailing_pe, (int, float)) and trailing_pe < 25) else "Premium"} PE of {trailing_pe_str}x
 - **Market Position:** {mcap_str} market cap indicates {"large-cap" if mcap >= 10e9 else "mid-cap" if mcap >= 2e9 else "small-cap"} status
 - **Income:** {"Dividend-paying" if (info.get('dividendYield', 0) or 0) > 0 else "Growth-focused (no dividend)"}
 
