@@ -1090,8 +1090,22 @@ elif page == "📄 Reports":
     # Add fiscal year input for full reports
     if report_type == "Full PDF Research Report (SEC 10-K Analysis)":
         fyear = st.text_input("Fiscal Year", value=str(datetime.now().year - 1), key="report_fyear")
-        st.info("💡 Full reports analyze SEC 10-K filings, financial statements, and generate professional PDFs with charts. This may take 2-5 minutes.")
-        st.warning("⚠️ **Note:** Full PDF reports require SEC-API key. Ensure it's set in your environment or config_api_keys file.")
+        with st.expander("ℹ️ About Full PDF Reports", expanded=False):
+            st.markdown("""
+            **What's included:**
+            - 📄 SEC 10-K filing analysis
+            - 📊 Financial statement analysis (Balance Sheet, Income Statement, Cash Flow)
+            - 📈 Performance charts (Share price vs S&P 500, PE/EPS trends)
+            - 🧠 AI-synthesized business overview, market position, risk assessment
+            - 📝 Professional PDF format (like Microsoft_Annual_Report_2023.pdf)
+            
+            **Why it takes 2-5 minutes:**
+            - Multiple API calls (SEC, YFinance, FMP)
+            - AI analysis of large financial documents
+            - Chart generation and PDF compilation
+            
+            **Requirements:** SEC-API key (set in environment or config_api_keys file)
+            """)
     
     if st.button("📝 Generate Report", use_container_width=True):
         with st.spinner(f"Generating {report_type} for {ticker}..."):
@@ -1247,12 +1261,28 @@ Based on current metrics:
                         "timeout": 120,
                     }
                     
-                    # Initialize agent
+                    # Initialize agent with better progress tracking
                     progress_bar = st.progress(0)
                     status_text = st.empty()
+                    detail_text = st.empty()
+                    time_text = st.empty()
                     
-                    status_text.info("🤖 Initializing AI Financial Analyst Agent...")
-                    progress_bar.progress(10)
+                    # Show what's happening and why it takes time
+                    st.info("""
+                    **⏱️ Why this takes 2-5 minutes:**
+                    - 📄 Retrieving SEC 10-K filing (~10-20s)
+                    - 📊 Analyzing 3 financial statements (~30-60s)
+                    - 🧠 AI synthesizing analysis (~60-120s)
+                    - 📈 Generating performance charts (~20-30s)
+                    - 📝 Compiling professional PDF (~10-20s)
+                    
+                    **Total: ~2-5 minutes** (depending on API response times)
+                    """)
+                    
+                    status_text.info("🤖 **Step 1/6:** Initializing AI Financial Analyst Agent...")
+                    detail_text.text("Setting up the agent with access to financial analysis tools...")
+                    time_text.text("⏱️ Estimated time remaining: 4-5 minutes")
+                    progress_bar.progress(5)
                     
                     assistant = SingleAssistantShadow(
                         "Expert_Investor",
@@ -1261,8 +1291,10 @@ Based on current metrics:
                         human_input_mode="NEVER",
                     )
                     
-                    status_text.info("📊 Retrieving SEC 10-K filing and analyzing financial statements...")
-                    progress_bar.progress(20)
+                    status_text.info("📊 **Step 2/6:** Retrieving SEC 10-K filing...")
+                    detail_text.text(f"Fetching {ticker}'s {fyear} annual report from SEC database...")
+                    time_text.text("⏱️ Estimated time remaining: 3-4 minutes")
+                    progress_bar.progress(15)
                     
                     # Create the task message
                     company_name = ticker
@@ -1279,13 +1311,25 @@ Based on current metrics:
                         """
                     )
                     
-                    status_text.info("🧠 AI Agent is analyzing and generating the comprehensive report...")
-                    progress_bar.progress(40)
+                    status_text.info("🧠 **Step 3/6:** AI Agent is working...")
+                    detail_text.text("The agent is now: 1) Retrieving SEC filing, 2) Analyzing financial statements, 3) Generating charts, 4) Writing analysis, 5) Creating PDF")
+                    time_text.text("⏱️ This step takes 2-4 minutes. Please wait...")
+                    progress_bar.progress(30)
                     
                     # Run the agent (this will take time)
                     try:
+                        import time
+                        start_time = time.time()
+                        
+                        # Note: The agent runs all steps internally, we can't easily track intermediate progress
+                        # but we'll update the UI when it completes
                         assistant.chat(message, use_cache=False, max_turns=50, summary_method="last_msg")
+                        
+                        elapsed = time.time() - start_time
                         progress_bar.progress(90)
+                        status_text.info("✅ **Step 6/6:** Finalizing report...")
+                        detail_text.text(f"Agent completed in {elapsed:.1f} seconds. Checking for generated PDF...")
+                        time_text.text("")
                         
                         # Check if PDF was generated
                         pdf_path = os.path.join(work_dir, f"{ticker}_Equity_Research_report.pdf")
