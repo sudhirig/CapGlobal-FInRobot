@@ -638,11 +638,54 @@ I can help you with:
                     # Setup LLM config
                     openai_key = os.environ.get('OPENAI_API_KEY')
                     
+                    # If not in environment, try loading from OAI_CONFIG_LIST as fallback
+                    if not openai_key or openai_key.strip() == '':
+                        try:
+                            import json
+                            if os.path.exists('OAI_CONFIG_LIST'):
+                                with open('OAI_CONFIG_LIST', 'r') as f:
+                                    config_list = json.load(f)
+                                    if config_list and len(config_list) > 0:
+                                        # Get the first config's API key (prefer gpt-4o if available)
+                                        for config in config_list:
+                                            if config.get('model') == 'gpt-4o':
+                                                openai_key = config.get('api_key', '')
+                                                break
+                                        # If no gpt-4o, use first one
+                                        if not openai_key and config_list:
+                                            openai_key = config_list[0].get('api_key', '')
+                                        # Set in environment for future use
+                                        if openai_key:
+                                            os.environ['OPENAI_API_KEY'] = openai_key
+                        except Exception as e:
+                            pass  # Silently fail and use validation below
+                    
                     # Check for placeholder/invalid API keys
-                    if not openai_key:
-                        response = "⚠️ Please configure your OpenAI API key in the sidebar to use AI Chat."
-                    elif 'your_act' in openai_key.lower() or 'your_openai' in openai_key.lower() or 'sk-your' in openai_key.lower() or openai_key.startswith('sk-YOUR'):
-                        response = """⚠️ **Invalid API Key Detected**
+                    if not openai_key or openai_key.strip() == '':
+                        response = """⚠️ **OpenAI API Key Not Found**
+
+Please configure your OpenAI API key:
+
+1. Go to the **sidebar** → **🔑 API Keys**
+2. Enter your **OpenAI API key** (starts with `sk-proj-` or `sk-`)
+3. Click **💾 Save Keys**
+
+You can get your API key from: https://platform.openai.com/account/api-keys
+
+**Alternative:** If you have an `OAI_CONFIG_LIST` file with your API key, it will be loaded automatically."""
+                    elif len(openai_key) < 20:  # Valid keys are much longer
+                        response = f"""⚠️ **API Key Too Short**
+
+The API key appears to be invalid (too short). Valid OpenAI API keys are long strings.
+
+**Current key length:** {len(openai_key)} characters
+
+Please:
+1. Go to the **sidebar** → **🔑 API Keys**
+2. Enter your **complete OpenAI API key** from https://platform.openai.com/account/api-keys
+3. Click **💾 Save Keys**"""
+                    elif 'your_act' in openai_key.lower() or 'your_openai' in openai_key.lower() or 'sk-your' in openai_key.lower() or openai_key.startswith('sk-YOUR') or openai_key == 'YOUR_OPENAI_API_KEY':
+                        response = """⚠️ **Placeholder API Key Detected**
 
 It looks like you're using a placeholder API key. Please:
 
