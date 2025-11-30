@@ -347,20 +347,43 @@ with st.sidebar:
     
     # API Key configuration
     with st.expander("🔑 API Keys", expanded=not st.session_state.api_configured):
+        # Get current keys, but filter out placeholder values
+        current_openai = os.environ.get('OPENAI_API_KEY', '')
+        current_finnhub = os.environ.get('FINNHUB_API_KEY', '')
+        
+        # Check if current keys are placeholders
+        if current_openai and ('your_act' in current_openai.lower() or 'your_openai' in current_openai.lower() or 'sk-your' in current_openai.lower() or current_openai.startswith('sk-YOUR')):
+            current_openai = ''  # Clear placeholder
+            st.warning("⚠️ Detected placeholder API key. Please enter your real API key.")
+        
         openai_key = st.text_input("OpenAI API Key", type="password", 
-                                    value=os.environ.get('OPENAI_API_KEY', ''))
+                                    value=current_openai,
+                                    help="Enter your OpenAI API key (starts with sk-proj- or sk-)")
         finnhub_key = st.text_input("Finnhub API Key", type="password",
-                                     value=os.environ.get('FINNHUB_API_KEY', ''))
+                                     value=current_finnhub,
+                                     help="Enter your Finnhub API key")
         
         if st.button("💾 Save Keys"):
+            # Validate API keys before saving
             if openai_key:
-                os.environ['OPENAI_API_KEY'] = openai_key
+                if 'your_act' in openai_key.lower() or 'your_openai' in openai_key.lower() or 'sk-your' in openai_key.lower() or openai_key.startswith('sk-YOUR'):
+                    st.error("❌ Invalid API key detected! Please enter your real OpenAI API key (not a placeholder).")
+                elif not (openai_key.startswith('sk-') or openai_key.startswith('sk-proj-')):
+                    st.warning("⚠️ API key format looks unusual. OpenAI keys usually start with 'sk-' or 'sk-proj-'")
+                else:
+                    os.environ['OPENAI_API_KEY'] = openai_key
+                    st.success("✅ OpenAI API key saved!")
             if finnhub_key:
-                os.environ['FINNHUB_API_KEY'] = finnhub_key
-            if openai_key or finnhub_key:
+                if 'your_' in finnhub_key.lower() or finnhub_key == 'YOUR_FINNHUB_API_KEY':
+                    st.error("❌ Invalid API key detected! Please enter your real Finnhub API key.")
+                else:
+                    os.environ['FINNHUB_API_KEY'] = finnhub_key
+                    st.success("✅ Finnhub API key saved!")
+            
+            if (openai_key and not ('your_act' in openai_key.lower() or 'your_openai' in openai_key.lower() or 'sk-your' in openai_key.lower() or openai_key.startswith('sk-YOUR'))) or (finnhub_key and not ('your_' in finnhub_key.lower() or finnhub_key == 'YOUR_FINNHUB_API_KEY')):
                 st.session_state.api_configured = True
-                st.success("✅ Keys saved!")
-                st.rerun()
+                if openai_key or finnhub_key:
+                    st.rerun()
     
     st.markdown("---")
     
@@ -614,18 +637,50 @@ I can help you with:
                     
                     # Setup LLM config
                     openai_key = os.environ.get('OPENAI_API_KEY')
+                    
+                    # Check for placeholder/invalid API keys
                     if not openai_key:
                         response = "⚠️ Please configure your OpenAI API key in the sidebar to use AI Chat."
+                    elif 'your_act' in openai_key.lower() or 'your_openai' in openai_key.lower() or 'sk-your' in openai_key.lower() or openai_key.startswith('sk-YOUR'):
+                        response = """⚠️ **Invalid API Key Detected**
+
+It looks like you're using a placeholder API key. Please:
+
+1. Go to the **sidebar** → **🔑 API Keys**
+2. Enter your **real OpenAI API key** (starts with `sk-proj-` or `sk-`)
+3. Click **💾 Save Keys**
+
+You can get your API key from: https://platform.openai.com/account/api-keys
+
+**Note:** The API key should start with `sk-proj-` or `sk-` and be a long string of characters."""
                     else:
-                        # Create LLM config (AutoGen format)
-                        llm_config = {
-                            "config_list": [{
-                                "model": "gpt-4o",
-                                "api_key": openai_key,
-                            }],
-                            "temperature": 0.7,
-                            "timeout": 120,
-                        }
+                        # Validate API key format
+                        if not (openai_key.startswith('sk-') or openai_key.startswith('sk-proj-')):
+                            response = f"""⚠️ **Invalid API Key Format**
+
+The API key you provided doesn't match the expected format. OpenAI API keys should start with `sk-` or `sk-proj-`.
+
+**Current key format:** `{openai_key[:10]}...` (first 10 characters)
+
+Please:
+1. Go to the **sidebar** → **🔑 API Keys**
+2. Enter your **real OpenAI API key** from https://platform.openai.com/account/api-keys
+3. Click **💾 Save Keys**
+
+**Note:** Make sure you're copying the entire API key (it's a long string)."""
+                        else:
+                            # Create LLM config (AutoGen format) - explicitly use the key from environment
+                            llm_config = {
+                                "config_list": [{
+                                    "model": "gpt-4o",
+                                    "api_key": openai_key,  # Use the validated key from os.environ
+                                }],
+                                "temperature": 0.7,
+                                "timeout": 120,
+                            }
+                            
+                            # Ensure we're not using any default/fallback configs
+                            # Explicitly set the API key to avoid AutoGen loading from OAI_CONFIG_LIST
                         
                         # Initialize assistant agent (reuse if exists, create if not)
                         if 'chat_assistant' not in st.session_state:
