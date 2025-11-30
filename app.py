@@ -572,88 +572,96 @@ elif page == "🤖 AI Chat":
         with st.chat_message("user"):
             st.markdown(prompt)
         
-        # Generate response
+        # Generate response using LLM
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("🧠 ARIA is thinking..."):
                 try:
-                    from finrobot.data_source import YFinanceUtils
-                    import re
+                    import autogen
+                    from finrobot.agents.workflow import SingleAssistant
+                    from finrobot.utils import register_keys_from_json
                     
-                    # Company name to ticker mapping
-                    company_to_ticker = {
-                        'microsoft': 'MSFT', 'apple': 'AAPL', 'google': 'GOOGL', 'alphabet': 'GOOGL',
-                        'amazon': 'AMZN', 'meta': 'META', 'facebook': 'META', 'nvidia': 'NVDA',
-                        'tesla': 'TSLA', 'netflix': 'NFLX', 'disney': 'DIS', 'intel': 'INTC',
-                        'amd': 'AMD', 'paypal': 'PYPL', 'adobe': 'ADBE', 'salesforce': 'CRM',
-                        'oracle': 'ORCL', 'ibm': 'IBM', 'cisco': 'CSCO', 'walmart': 'WMT',
-                        'jpmorgan': 'JPM', 'visa': 'V', 'mastercard': 'MA', 'boeing': 'BA',
-                        'coca-cola': 'KO', 'pepsi': 'PEP', 'mcdonalds': 'MCD', 'nike': 'NKE',
-                        'starbucks': 'SBUX', 'berkshire': 'BRK-B', 'johnson': 'JNJ', 'pfizer': 'PFE',
-                        'moderna': 'MRNA', 'spotify': 'SPOT', 'uber': 'UBER', 'airbnb': 'ABNB',
-                        'snowflake': 'SNOW', 'palantir': 'PLTR', 'coinbase': 'COIN', 'robinhood': 'HOOD'
-                    }
+                    # Ensure API keys are registered
+                    if os.path.exists('config_api_keys'):
+                        register_keys_from_json('config_api_keys')
                     
-                    # Common words to skip (not tickers)
-                    skip_words = {'I', 'A', 'THE', 'IS', 'IT', 'TO', 'FOR', 'AND', 'OR', 'OF', 'IN', 'ON', 'AT',
-                                  'ME', 'MY', 'BE', 'DO', 'IF', 'SO', 'NO', 'YES', 'CAN', 'HOW', 'WHY', 'WHO',
-                                  'TELL', 'ABOUT', 'WHAT', 'SHOW', 'GET', 'GIVE', 'FIND', 'LOOK', 'SEE',
-                                  'STOCK', 'PRICE', 'INFO', 'DATA'}
-                    
-                    ticker = None
-                    prompt_lower = prompt.lower()
-                    
-                    # First, check for company names
-                    for company, tick in company_to_ticker.items():
-                        if company in prompt_lower:
-                            ticker = tick
-                            break
-                    
-                    # If no company name found, look for explicit tickers (uppercase words)
-                    if not ticker:
-                        # Find all uppercase words that could be tickers
-                        words = prompt.split()
-                        for word in words:
-                            clean_word = re.sub(r'[^A-Za-z]', '', word).upper()
-                            if 1 <= len(clean_word) <= 5 and clean_word not in skip_words:
-                                # Check if it looks like a ticker (all caps in original or explicitly mentioned)
-                                if word.isupper() or clean_word == word.upper():
-                                    ticker = clean_word
-                                    break
-                    
-                    if ticker:
-                        try:
-                            info = YFinanceUtils.get_stock_info(ticker)
-                            if info and info.get('longName'):
-                                price = info.get('currentPrice', info.get('regularMarketPrice', 0))
-                                mcap = info.get('marketCap', 0)
-                                mcap_str = f"${mcap/1e12:.2f}T" if mcap >= 1e12 else f"${mcap/1e9:.2f}B"
-                                
-                                response = f"""Here's what I found about **{ticker}** ({info.get('longName', 'N/A')}):
-
-| Metric | Value |
-|--------|-------|
-| 💰 Current Price | **${price:.2f}** |
-| 📊 Market Cap | {mcap_str} |
-| 📈 PE Ratio | {info.get('trailingPE', 0):.1f} |
-| 📉 52-Week Range | ${info.get('fiftyTwoWeekLow', 0):.2f} - ${info.get('fiftyTwoWeekHigh', 0):.2f} |
-| 💵 Dividend Yield | {(info.get('dividendYield', 0) or 0)*100:.2f}% |
-
-**About the company:**
-{(info.get('longBusinessSummary', 'No description available.'))[:400]}...
-
-*Want more details? Try "Analyze {ticker}" in the Stock Analysis tab!*"""
-                            else:
-                                response = f"I couldn't find data for **{ticker}**. Please check if it's a valid stock ticker."
-                        except:
-                            response = f"I couldn't retrieve data for **{ticker}**. Please try again."
+                    # Setup LLM config
+                    openai_key = os.environ.get('OPENAI_API_KEY')
+                    if not openai_key:
+                        response = "⚠️ Please configure your OpenAI API key in the sidebar to use AI Chat."
                     else:
-                        response = get_default_response()
+                        # Create LLM config (AutoGen format)
+                        llm_config = {
+                            "config_list": [{
+                                "model": "gpt-4o",
+                                "api_key": openai_key,
+                            }],
+                            "temperature": 0.7,
+                            "timeout": 120,
+                        }
+                        
+                        # Initialize assistant agent (reuse if exists, create if not)
+                        if 'chat_assistant' not in st.session_state:
+                            st.session_state.chat_assistant = SingleAssistant(
+                                "Financial_Analyst",
+                                llm_config=llm_config,
+                                human_input_mode="NEVER",
+                                max_consecutive_auto_reply=3,
+                            )
+                        
+                        # Use LLM to generate response via AutoGen
+                        # Run the chat and capture response from conversation history
+                        try:
+                            # Initiate chat (don't use .chat() as it resets, use initiate_chat directly)
+                            st.session_state.chat_assistant.user_proxy.initiate_chat(
+                                st.session_state.chat_assistant.assistant,
+                                message=prompt,
+                                max_turns=3,
+                            )
+                            
+                            # Get the last message from the assistant
+                            # Messages are stored in user_proxy's chat_messages dict
+                            assistant_name = st.session_state.chat_assistant.assistant.name
+                            if assistant_name in st.session_state.chat_assistant.user_proxy.chat_messages:
+                                messages = st.session_state.chat_assistant.user_proxy.chat_messages[assistant_name]
+                                # Get the last assistant message (skip user messages)
+                                for msg in reversed(messages):
+                                    if isinstance(msg, dict) and msg.get("role") == "assistant":
+                                        response = msg.get("content", "")
+                                        break
+                                    elif not isinstance(msg, dict):
+                                        # Sometimes messages are strings
+                                        response = str(msg)
+                                        break
+                                
+                                # If no assistant message found, get the last message
+                                if not response and messages:
+                                    last_msg = messages[-1]
+                                    if isinstance(last_msg, dict):
+                                        response = last_msg.get("content", "")
+                                    else:
+                                        response = str(last_msg)
+                            else:
+                                response = "I'm processing your request. Please try rephrasing your question."
+                                
+                        except Exception as chat_error:
+                            # Fallback to a helpful response
+                            response = f"""I'm ARIA, your AI Financial Analyst powered by GPT-4. 
+
+I can help you with:
+- **Stock Analysis**: Ask about any company (e.g., "Tell me about Microsoft" or "Analyze AAPL")
+- **Market Insights**: Questions about market trends and sectors
+- **Financial Data**: Current prices, financials, news, and more
+
+*Note: I have access to real-time financial data tools via AutoGen framework.*
+
+Error details: {str(chat_error)}"""
                     
                     st.markdown(response)
                     st.session_state.chat_history.append({"role": "assistant", "content": response})
                     
                 except Exception as e:
-                    error_msg = f"Sorry, I encountered an error: {str(e)}"
+                    import traceback
+                    error_msg = f"Sorry, I encountered an error: {str(e)}\n\n*Please ensure your OpenAI API key is configured correctly.*"
                     st.error(error_msg)
                     st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
     
