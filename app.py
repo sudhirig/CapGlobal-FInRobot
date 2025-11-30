@@ -681,54 +681,54 @@ Please:
                             
                             # Ensure we're not using any default/fallback configs
                             # Explicitly set the API key to avoid AutoGen loading from OAI_CONFIG_LIST
-                        
-                        # Initialize assistant agent (reuse if exists, create if not)
-                        if 'chat_assistant' not in st.session_state:
-                            st.session_state.chat_assistant = SingleAssistant(
-                                "Financial_Analyst",
-                                llm_config=llm_config,
-                                human_input_mode="NEVER",
-                                max_consecutive_auto_reply=3,
-                            )
-                        
-                        # Use LLM to generate response via AutoGen
-                        # Run the chat and capture response from conversation history
-                        try:
-                            # Initiate chat (don't use .chat() as it resets, use initiate_chat directly)
-                            st.session_state.chat_assistant.user_proxy.initiate_chat(
-                                st.session_state.chat_assistant.assistant,
-                                message=prompt,
-                                max_turns=3,
-                            )
                             
-                            # Get the last message from the assistant
-                            # Messages are stored in user_proxy's chat_messages dict
-                            assistant_name = st.session_state.chat_assistant.assistant.name
-                            if assistant_name in st.session_state.chat_assistant.user_proxy.chat_messages:
-                                messages = st.session_state.chat_assistant.user_proxy.chat_messages[assistant_name]
-                                # Get the last assistant message (skip user messages)
-                                for msg in reversed(messages):
-                                    if isinstance(msg, dict) and msg.get("role") == "assistant":
-                                        response = msg.get("content", "")
-                                        break
-                                    elif not isinstance(msg, dict):
-                                        # Sometimes messages are strings
-                                        response = str(msg)
-                                        break
+                            # Initialize assistant agent (reuse if exists, create if not)
+                            if 'chat_assistant' not in st.session_state:
+                                st.session_state.chat_assistant = SingleAssistant(
+                                    "Financial_Analyst",
+                                    llm_config=llm_config,
+                                    human_input_mode="NEVER",
+                                    max_consecutive_auto_reply=3,
+                                )
+                            
+                            # Use LLM to generate response via AutoGen
+                            # Run the chat and capture response from conversation history
+                            try:
+                                # Initiate chat (don't use .chat() as it resets, use initiate_chat directly)
+                                st.session_state.chat_assistant.user_proxy.initiate_chat(
+                                    st.session_state.chat_assistant.assistant,
+                                    message=prompt,
+                                    max_turns=3,
+                                )
                                 
-                                # If no assistant message found, get the last message
-                                if not response and messages:
-                                    last_msg = messages[-1]
-                                    if isinstance(last_msg, dict):
-                                        response = last_msg.get("content", "")
-                                    else:
-                                        response = str(last_msg)
-                            else:
-                                response = "I'm processing your request. Please try rephrasing your question."
-                                
-                        except Exception as chat_error:
-                            # Fallback to a helpful response
-                            response = f"""I'm ARIA, your AI Financial Analyst powered by GPT-4. 
+                                # Get the last message from the assistant
+                                # Messages are stored in user_proxy's chat_messages dict
+                                assistant_name = st.session_state.chat_assistant.assistant.name
+                                if assistant_name in st.session_state.chat_assistant.user_proxy.chat_messages:
+                                    messages = st.session_state.chat_assistant.user_proxy.chat_messages[assistant_name]
+                                    # Get the last assistant message (skip user messages)
+                                    for msg in reversed(messages):
+                                        if isinstance(msg, dict) and msg.get("role") == "assistant":
+                                            response = msg.get("content", "")
+                                            break
+                                        elif not isinstance(msg, dict):
+                                            # Sometimes messages are strings
+                                            response = str(msg)
+                                            break
+                                    
+                                    # If no assistant message found, get the last message
+                                    if not response and messages:
+                                        last_msg = messages[-1]
+                                        if isinstance(last_msg, dict):
+                                            response = last_msg.get("content", "")
+                                        else:
+                                            response = str(last_msg)
+                                else:
+                                    response = "I'm processing your request. Please try rephrasing your question."
+                                    
+                            except Exception as chat_error:
+                                # Fallback to a helpful response
+                                response = f"""I'm ARIA, your AI Financial Analyst powered by GPT-4. 
 
 I can help you with:
 - **Stock Analysis**: Ask about any company (e.g., "Tell me about Microsoft" or "Analyze AAPL")
