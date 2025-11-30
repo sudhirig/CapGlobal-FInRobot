@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "finrobot"
+version = "0.1.0"
+description = "AI-Powered Financial Analysis Platform"
+authors = ["CapGlobal"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+streamlit = "^1.29.0"
+pyautogen = "^0.2.35"
+yfinance = "^0.2.33"
+finnhub-python = "^2.4.19"
+mplfinance = "^0.12.10b0"
+reportlab = "^4.0.7"
+pandas = "^2.1.4"
+matplotlib = "^3.8.2"
+numpy = "^1.26.2"
+requests = "^2.31.0"
+sec-api = "^1.0.17"
+pypdf = "^3.17.1"
+markdownify = "^0.11.6"
+sentence-transformers = "^2.2.2"
+backtrader = "^1.9.78.123"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+finrobot = "main:main"
+
