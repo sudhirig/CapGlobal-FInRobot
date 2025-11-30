@@ -579,22 +579,56 @@ elif page == "🤖 AI Chat":
                     from finrobot.data_source import YFinanceUtils
                     import re
                     
-                    # Extract ticker if mentioned
-                    ticker_match = re.search(r'\b([A-Z]{1,5})\b', prompt.upper())
+                    # Company name to ticker mapping
+                    company_to_ticker = {
+                        'microsoft': 'MSFT', 'apple': 'AAPL', 'google': 'GOOGL', 'alphabet': 'GOOGL',
+                        'amazon': 'AMZN', 'meta': 'META', 'facebook': 'META', 'nvidia': 'NVDA',
+                        'tesla': 'TSLA', 'netflix': 'NFLX', 'disney': 'DIS', 'intel': 'INTC',
+                        'amd': 'AMD', 'paypal': 'PYPL', 'adobe': 'ADBE', 'salesforce': 'CRM',
+                        'oracle': 'ORCL', 'ibm': 'IBM', 'cisco': 'CSCO', 'walmart': 'WMT',
+                        'jpmorgan': 'JPM', 'visa': 'V', 'mastercard': 'MA', 'boeing': 'BA',
+                        'coca-cola': 'KO', 'pepsi': 'PEP', 'mcdonalds': 'MCD', 'nike': 'NKE',
+                        'starbucks': 'SBUX', 'berkshire': 'BRK-B', 'johnson': 'JNJ', 'pfizer': 'PFE',
+                        'moderna': 'MRNA', 'spotify': 'SPOT', 'uber': 'UBER', 'airbnb': 'ABNB',
+                        'snowflake': 'SNOW', 'palantir': 'PLTR', 'coinbase': 'COIN', 'robinhood': 'HOOD'
+                    }
                     
-                    if ticker_match and any(word in prompt.lower() for word in ['price', 'stock', 'analyze', 'tell', 'about', 'what']):
-                        ticker = ticker_match.group(1)
-                        
-                        # Skip common words
-                        if ticker not in ['I', 'A', 'THE', 'IS', 'IT', 'TO', 'FOR', 'AND', 'OR', 'OF', 'IN', 'ON', 'AT']:
-                            try:
-                                info = YFinanceUtils.get_stock_info(ticker)
-                                if info and info.get('longName'):
-                                    price = info.get('currentPrice', info.get('regularMarketPrice', 0))
-                                    mcap = info.get('marketCap', 0)
-                                    mcap_str = f"${mcap/1e12:.2f}T" if mcap >= 1e12 else f"${mcap/1e9:.2f}B"
-                                    
-                                    response = f"""Here's what I found about **{ticker}** ({info.get('longName', 'N/A')}):
+                    # Common words to skip (not tickers)
+                    skip_words = {'I', 'A', 'THE', 'IS', 'IT', 'TO', 'FOR', 'AND', 'OR', 'OF', 'IN', 'ON', 'AT',
+                                  'ME', 'MY', 'BE', 'DO', 'IF', 'SO', 'NO', 'YES', 'CAN', 'HOW', 'WHY', 'WHO',
+                                  'TELL', 'ABOUT', 'WHAT', 'SHOW', 'GET', 'GIVE', 'FIND', 'LOOK', 'SEE',
+                                  'STOCK', 'PRICE', 'INFO', 'DATA'}
+                    
+                    ticker = None
+                    prompt_lower = prompt.lower()
+                    
+                    # First, check for company names
+                    for company, tick in company_to_ticker.items():
+                        if company in prompt_lower:
+                            ticker = tick
+                            break
+                    
+                    # If no company name found, look for explicit tickers (uppercase words)
+                    if not ticker:
+                        # Find all uppercase words that could be tickers
+                        words = prompt.split()
+                        for word in words:
+                            clean_word = re.sub(r'[^A-Za-z]', '', word).upper()
+                            if 1 <= len(clean_word) <= 5 and clean_word not in skip_words:
+                                # Check if it looks like a ticker (all caps in original or explicitly mentioned)
+                                if word.isupper() or clean_word == word.upper():
+                                    ticker = clean_word
+                                    break
+                    
+                    if ticker:
+                        try:
+                            info = YFinanceUtils.get_stock_info(ticker)
+                            if info and info.get('longName'):
+                                price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+                                mcap = info.get('marketCap', 0)
+                                mcap_str = f"${mcap/1e12:.2f}T" if mcap >= 1e12 else f"${mcap/1e9:.2f}B"
+                                
+                                response = f"""Here's what I found about **{ticker}** ({info.get('longName', 'N/A')}):
 
 | Metric | Value |
 |--------|-------|
@@ -608,12 +642,10 @@ elif page == "🤖 AI Chat":
 {(info.get('longBusinessSummary', 'No description available.'))[:400]}...
 
 *Want more details? Try "Analyze {ticker}" in the Stock Analysis tab!*"""
-                                else:
-                                    response = f"I couldn't find data for **{ticker}**. Please check if it's a valid stock ticker."
-                            except:
-                                response = f"I couldn't retrieve data for **{ticker}**. Please try again."
-                        else:
-                            response = get_default_response()
+                            else:
+                                response = f"I couldn't find data for **{ticker}**. Please check if it's a valid stock ticker."
+                        except:
+                            response = f"I couldn't retrieve data for **{ticker}**. Please try again."
                     else:
                         response = get_default_response()
                     
