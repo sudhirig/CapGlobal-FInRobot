@@ -805,38 +805,66 @@ elif page == "🧠 AI Investment Team":
                     
                     progress_placeholder.empty()
                     
-                    # Display results
-                    st.markdown("### 📋 Team Analysis Report")
+                    # Display results using Streamlit components
+                    st.markdown("---")
+                    st.markdown(f"## 📋 {info.get('longName', ticker)} ({ticker})")
+                    st.caption(f"{info.get('sector', 'N/A')} | {info.get('industry', 'N/A')}")
                     
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
-                                padding: 2rem; border-radius: 16px; border: 1px solid #3d3d7a;">
-                        <h2 style="color: #fff; text-align: center;">{info.get('longName', ticker)} ({ticker})</h2>
-                        <p style="color: #888; text-align: center;">{info.get('sector', 'N/A')} | {info.get('industry', 'N/A')}</p>
+                    # Recommendation banner
+                    rec_emoji = "🟢" if "BUY" in recommendation else "🟡" if "HOLD" in recommendation else "🔴"
+                    st.success(f"""
+                    ### {rec_emoji} ARIA™ AI Team Recommendation: **{recommendation}**
+                    """)
+                    
+                    st.markdown("---")
+                    
+                    # Analyst findings in columns
+                    st.markdown("### 👥 Team Findings")
+                    
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.markdown("#### 📊 Market Analyst")
+                        st.info(f"""
+                        **News:** {news_summary}
                         
-                        <div style="text-align: center; margin: 2rem 0;">
-                            <h1 style="color: {rec_color}; font-size: 2.5rem;">{recommendation}</h1>
-                            <p style="color: #a0a0ff;">ARIA™ AI Team Consensus</p>
-                        </div>
+                        **Price:** ${price:.2f}
                         
-                        <hr style="border-color: #3d3d7a;">
+                        **vs 52W High:** {abs(price_vs_high):.1f}% {"below" if price_vs_high < 0 else "above"}
+                        """)
+                    
+                    with col2:
+                        st.markdown("#### 💰 Fundamental Analyst")
+                        st.info(f"""
+                        **PE Ratio:** {pe:.1f}x
                         
-                        <h4 style="color: #4da6ff;">📊 Market Analyst Findings:</h4>
-                        <p style="color: #ccc;">{news_summary}. Current price ${price:.2f} is {abs(price_vs_high):.1f}% {"below" if price_vs_high < 0 else "above"} 52-week high.</p>
+                        **Valuation:** {valuation.title()}
                         
-                        <h4 style="color: #4dff6a;">💰 Fundamental Analyst Findings:</h4>
-                        <p style="color: #ccc;">PE Ratio: {pe:.1f}x - Stock appears {valuation}. Market Cap: ${mcap/1e9:.1f}B.</p>
+                        **Market Cap:** ${mcap/1e9:.1f}B
+                        """)
+                    
+                    with col3:
+                        st.markdown("#### 📈 Technical Analyst")
+                        st.info(f"""
+                        **52W High:** ${high_52:.2f}
                         
-                        <h4 style="color: #ff4da6;">📈 Technical Analyst Findings:</h4>
-                        <p style="color: #ccc;">52-Week Range: ${low_52:.2f} - ${high_52:.2f}. Momentum is {momentum}.</p>
+                        **52W Low:** ${low_52:.2f}
                         
-                        <hr style="border-color: #3d3d7a;">
-                        
-                        <h4 style="color: #b44dff;">👔 CIO Summary:</h4>
-                        <p style="color: #ccc;">Based on the team's analysis, {ticker} shows {valuation} characteristics with {momentum} 
-                        price momentum. The consensus recommendation is <strong style="color: {rec_color};">{recommendation}</strong>.</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+                        **Momentum:** {momentum.title()}
+                        """)
+                    
+                    st.markdown("---")
+                    
+                    # CIO Summary
+                    st.markdown("### 👔 CIO Summary")
+                    st.warning(f"""
+                    Based on the team's comprehensive analysis, **{ticker}** shows **{valuation}** 
+                    characteristics with **{momentum}** price momentum.
+                    
+                    **Final Recommendation: {recommendation}**
+                    """)
+                    
+                    st.markdown("---")
                     
                     # Detailed metrics
                     st.markdown("### 📊 Key Metrics")
