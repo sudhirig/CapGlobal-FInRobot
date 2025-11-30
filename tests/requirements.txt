@@ -1,0 +1,32 @@
+# Testing Requirements
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.1
+pytest-asyncio>=0.21.0
+pytest-timeout>=2.1.0
+pytest-html>=3.2.0
+pytest-xdist>=3.3.0  # For parallel testing
+
+# Test utilities
+requests>=2.31.0
+responses>=0.23.1  # For mocking HTTP requests
+freezegun>=1.2.2  # For time mocking
+faker>=19.0.0  # For generating test data (but we'll detect if used in production)
+
+# Streamlit testing
+streamlit>=1.28.0
+selenium>=4.15.0  # For browser automation
+webdriver-manager>=4.0.1
+
+# API testing
+httpx>=0.25.0
+curlify>=2.2.1
+
+# Code quality
+pylint>=3.0.0
+black>=23.9.0
+mypy>=1.6.0
+
+# Coverage
+coverage>=7.3.0
+
