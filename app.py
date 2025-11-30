@@ -1197,34 +1197,41 @@ Based on current metrics:
                     import autogen
                     import json
                     
-                    # Check API keys
-                    if not st.session_state.get('openai_api_key'):
+                    # Check API keys from environment (where they're stored when saved in sidebar)
+                    openai_key = os.environ.get('OPENAI_API_KEY')
+                    finnhub_key = os.environ.get('FINNHUB_API_KEY')
+                    
+                    if not openai_key:
                         st.error("⚠️ Please configure OpenAI API key in the sidebar first!")
+                        st.info("💡 Go to the sidebar → 🔑 API Keys → Enter your OpenAI API key → Click '💾 Save Keys'")
                         st.stop()
                     
                     # Register API keys for the agent's tools
-                    # Set environment variables for SEC-API, FMP, etc.
-                    if st.session_state.get('finnhub_api_key'):
-                        os.environ['FINNHUB_API_KEY'] = st.session_state.get('finnhub_api_key')
-                    
                     # Check if config_api_keys exists, if not create temporary one
                     temp_config = False
                     if not os.path.exists('config_api_keys'):
                         config_data = {}
-                        if st.session_state.get('finnhub_api_key'):
-                            config_data['FINNHUB_API_KEY'] = st.session_state.get('finnhub_api_key')
+                        if finnhub_key:
+                            config_data['FINNHUB_API_KEY'] = finnhub_key
+                        # Check for SEC-API key in environment
+                        if os.environ.get('SEC_API_KEY'):
+                            config_data['SEC_API_KEY'] = os.environ.get('SEC_API_KEY')
+                        # Check for FMP key in environment
+                        if os.environ.get('FMP_API_KEY'):
+                            config_data['FMP_API_KEY'] = os.environ.get('FMP_API_KEY')
                         # Add other keys if available
                         if config_data:
                             with open('config_api_keys', 'w') as f:
                                 json.dump(config_data, f)
                             temp_config = True
                     
-                    # Register keys
+                    # Register keys from config file if it exists
                     if os.path.exists('config_api_keys'):
                         register_keys_from_json('config_api_keys')
                     
-                    # Set OpenAI key for autogen
-                    os.environ['OPENAI_API_KEY'] = st.session_state.get('openai_api_key')
+                    # Ensure OpenAI key is set in environment (should already be set from sidebar)
+                    if openai_key:
+                        os.environ['OPENAI_API_KEY'] = openai_key
                     
                     # Set up work directory
                     work_dir = "report"
@@ -1234,7 +1241,7 @@ Based on current metrics:
                     llm_config = {
                         "config_list": [{
                             "model": "gpt-4o",
-                            "api_key": st.session_state.get('openai_api_key')
+                            "api_key": openai_key
                         }],
                         "temperature": 0.5,
                         "timeout": 120,
