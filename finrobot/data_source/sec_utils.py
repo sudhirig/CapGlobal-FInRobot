@@ -84,8 +84,9 @@ class SECUtils:
                 with open(file_path, "w") as f:
                     f.write(file_content)
                 return f"{ticker}: download succeeded. Saved to {file_path}"
-            except:
-                return f"❌ {ticker}: downloaded failed: {url}"
+            except Exception as e:
+                error_msg = str(e)
+                return f"❌ {ticker}: download failed: {url}. Error: {error_msg}"
         else:
             return f"No 2023 10-K filing found for {ticker}"
 

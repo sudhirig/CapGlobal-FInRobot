@@ -393,5 +393,8 @@ class ReportLabUtils:
 
             return "Annual report generated successfully."
 
-        except Exception:
-            return traceback.format_exc()
+        except Exception as e:
+            # Return detailed error information (not silent failure)
+            error_details = traceback.format_exc()
+            print(f"Error generating annual report: {str(e)}")
+            return f"Error generating report: {str(e)}\n\nDetails:\n{error_details}"
