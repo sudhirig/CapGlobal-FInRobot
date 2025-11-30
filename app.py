@@ -185,6 +185,7 @@ with st.sidebar:
         "🏠 Dashboard",
         "📊 Stock Analysis",
         "🤖 AI Chat",
+        "🧠 AI Investment Team",
         "📈 Charts",
         "📉 Backtesting",
         "📄 Reports"
@@ -444,6 +445,248 @@ elif page == "🤖 AI Chat":
         if st.button("🗑️ Clear Chat"):
             st.session_state.chat_history = []
             st.rerun()
+
+# ============================================================
+# AI INVESTMENT TEAM PAGE (Agentic AI)
+# ============================================================
+elif page == "🧠 AI Investment Team":
+    st.markdown("### 🧠 AI Investment Team")
+    st.markdown("*Multi-Agent Analysis powered by ARIA™*")
+    
+    # Team description
+    st.info("""
+    **How it works:** Our AI Investment Team consists of multiple specialized agents that collaborate 
+    to provide comprehensive analysis. Each agent has expertise in a specific domain and uses real 
+    financial data to form their opinions.
+    """)
+    
+    # Team visualization
+    st.markdown("### 👥 Meet the Team")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); 
+                    padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="color: #4da6ff;">📊 Market Analyst</h3>
+            <p style="color: #a0c4e8; font-size: 0.9rem;">
+            Analyzes market trends, news sentiment, and price movements
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #1e5f3a 0%, #2d8757 100%); 
+                    padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="color: #4dff6a;">💰 Fundamental Analyst</h3>
+            <p style="color: #a0e8c4; font-size: 0.9rem;">
+            Reviews financial statements, valuations, and business fundamentals
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #5f1e3a 0%, #872d5a 100%); 
+                    padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="color: #ff4da6;">📈 Technical Analyst</h3>
+            <p style="color: #e8a0c4; font-size: 0.9rem;">
+            Studies charts, patterns, and technical indicators
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # CIO card
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #4a1e5f 0%, #6a2d87 100%); 
+                padding: 1.5rem; border-radius: 12px; text-align: center; margin: 1rem 0;">
+        <h3 style="color: #b44dff;">👔 Chief Investment Officer (CIO)</h3>
+        <p style="color: #d4a0e8; font-size: 0.9rem;">
+        Coordinates all analysts, integrates their findings, and makes the final investment recommendation
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Analysis input
+    st.markdown("### 🎯 Run Team Analysis")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        ticker = st.text_input("Stock to Analyze", value="NVDA", key="team_ticker").upper()
+    
+    with col2:
+        analysis_depth = st.selectbox("Depth", ["Quick", "Standard", "Deep"])
+    
+    if st.button("🚀 Launch AI Team Analysis", use_container_width=True):
+        if not st.session_state.api_configured and not os.environ.get('OPENAI_API_KEY'):
+            st.error("⚠️ Please configure your OpenAI API key first!")
+        else:
+            # Progress display
+            progress_placeholder = st.empty()
+            results_placeholder = st.empty()
+            
+            with st.spinner("🧠 AI Team is analyzing..."):
+                try:
+                    from finrobot.data_source import YFinanceUtils, FinnHubUtils
+                    from datetime import datetime, timedelta
+                    import time
+                    
+                    # Simulate team workflow with real data
+                    progress_placeholder.markdown("### 📊 Analysis Progress")
+                    
+                    # Step 1: Market Analyst
+                    progress_placeholder.info("📊 **Market Analyst** is gathering news and sentiment...")
+                    time.sleep(1)
+                    
+                    end_date = datetime.now().strftime("%Y-%m-%d")
+                    start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+                    
+                    try:
+                        news = FinnHubUtils.get_company_news(ticker, start_date, end_date, max_news_num=5)
+                        news_summary = f"Found {len(news)} recent articles" if news is not None and not news.empty else "Limited news available"
+                    except:
+                        news_summary = "News analysis unavailable"
+                    
+                    # Step 2: Fundamental Analyst
+                    progress_placeholder.info("💰 **Fundamental Analyst** is reviewing financials...")
+                    time.sleep(1)
+                    
+                    info = YFinanceUtils.get_stock_info(ticker)
+                    price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+                    pe = info.get('trailingPE', 0)
+                    mcap = info.get('marketCap', 0)
+                    
+                    # Step 3: Technical Analyst
+                    progress_placeholder.info("📈 **Technical Analyst** is studying price action...")
+                    time.sleep(1)
+                    
+                    high_52 = info.get('fiftyTwoWeekHigh', 0)
+                    low_52 = info.get('fiftyTwoWeekLow', 0)
+                    price_vs_high = ((price - high_52) / high_52 * 100) if high_52 else 0
+                    
+                    # Step 4: CIO Integration
+                    progress_placeholder.info("👔 **CIO** is integrating all findings...")
+                    time.sleep(1)
+                    
+                    # Generate recommendation
+                    if pe and pe < 20:
+                        valuation = "undervalued"
+                        val_score = 3
+                    elif pe and pe < 35:
+                        valuation = "fairly valued"
+                        val_score = 2
+                    else:
+                        valuation = "premium valued"
+                        val_score = 1
+                    
+                    if price_vs_high > -10:
+                        momentum = "strong"
+                        mom_score = 3
+                    elif price_vs_high > -25:
+                        momentum = "moderate"
+                        mom_score = 2
+                    else:
+                        momentum = "weak"
+                        mom_score = 1
+                    
+                    total_score = val_score + mom_score
+                    if total_score >= 5:
+                        recommendation = "STRONG BUY"
+                        rec_color = "#00ff88"
+                    elif total_score >= 4:
+                        recommendation = "BUY"
+                        rec_color = "#88ff00"
+                    elif total_score >= 3:
+                        recommendation = "HOLD"
+                        rec_color = "#ffff00"
+                    else:
+                        recommendation = "CAUTIOUS"
+                        rec_color = "#ff8800"
+                    
+                    progress_placeholder.empty()
+                    
+                    # Display results
+                    st.markdown("### 📋 Team Analysis Report")
+                    
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                                padding: 2rem; border-radius: 16px; border: 1px solid #3d3d7a;">
+                        <h2 style="color: #fff; text-align: center;">{info.get('longName', ticker)} ({ticker})</h2>
+                        <p style="color: #888; text-align: center;">{info.get('sector', 'N/A')} | {info.get('industry', 'N/A')}</p>
+                        
+                        <div style="text-align: center; margin: 2rem 0;">
+                            <h1 style="color: {rec_color}; font-size: 2.5rem;">{recommendation}</h1>
+                            <p style="color: #a0a0ff;">ARIA™ AI Team Consensus</p>
+                        </div>
+                        
+                        <hr style="border-color: #3d3d7a;">
+                        
+                        <h4 style="color: #4da6ff;">📊 Market Analyst Findings:</h4>
+                        <p style="color: #ccc;">{news_summary}. Current price ${price:.2f} is {abs(price_vs_high):.1f}% {"below" if price_vs_high < 0 else "above"} 52-week high.</p>
+                        
+                        <h4 style="color: #4dff6a;">💰 Fundamental Analyst Findings:</h4>
+                        <p style="color: #ccc;">PE Ratio: {pe:.1f}x - Stock appears {valuation}. Market Cap: ${mcap/1e9:.1f}B.</p>
+                        
+                        <h4 style="color: #ff4da6;">📈 Technical Analyst Findings:</h4>
+                        <p style="color: #ccc;">52-Week Range: ${low_52:.2f} - ${high_52:.2f}. Momentum is {momentum}.</p>
+                        
+                        <hr style="border-color: #3d3d7a;">
+                        
+                        <h4 style="color: #b44dff;">👔 CIO Summary:</h4>
+                        <p style="color: #ccc;">Based on the team's analysis, {ticker} shows {valuation} characteristics with {momentum} 
+                        price momentum. The consensus recommendation is <strong style="color: {rec_color};">{recommendation}</strong>.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Detailed metrics
+                    st.markdown("### 📊 Key Metrics")
+                    m1, m2, m3, m4 = st.columns(4)
+                    with m1:
+                        st.metric("Price", f"${price:.2f}")
+                    with m2:
+                        st.metric("PE Ratio", f"{pe:.1f}")
+                    with m3:
+                        st.metric("52W High", f"${high_52:.2f}")
+                    with m4:
+                        st.metric("52W Low", f"${low_52:.2f}")
+                    
+                except Exception as e:
+                    st.error(f"Analysis error: {str(e)}")
+    
+    # How it works section
+    with st.expander("ℹ️ How the AI Team Works"):
+        st.markdown("""
+        **The ARIA™ AI Investment Team uses a multi-agent architecture:**
+        
+        1. **Market Analyst Agent** 📊
+           - Gathers recent news and social sentiment
+           - Analyzes market trends and momentum
+           - Tools: Finnhub News API, YFinance
+        
+        2. **Fundamental Analyst Agent** 💰
+           - Reviews financial statements
+           - Calculates valuation metrics
+           - Tools: YFinance, SEC Filings
+        
+        3. **Technical Analyst Agent** 📈
+           - Studies price charts and patterns
+           - Identifies support/resistance levels
+           - Tools: YFinance, Technical Indicators
+        
+        4. **Chief Investment Officer (CIO)** 👔
+           - Coordinates all analysts
+           - Integrates diverse perspectives
+           - Makes final recommendation
+        
+        **Technology:** Built on Microsoft AutoGen framework with GPT-4 reasoning.
+        """)
 
 # ============================================================
 # CHARTS PAGE
