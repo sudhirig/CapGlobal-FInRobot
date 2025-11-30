@@ -339,6 +339,30 @@ try:
 except:
     pass
 
+# Also try loading OpenAI API key from OAI_CONFIG_LIST if not in environment
+if not os.environ.get('OPENAI_API_KEY') or os.environ.get('OPENAI_API_KEY', '').strip() == '':
+    try:
+        import json
+        if os.path.exists('OAI_CONFIG_LIST'):
+            with open('OAI_CONFIG_LIST', 'r') as f:
+                config_list = json.load(f)
+                if config_list and len(config_list) > 0:
+                    # Get the first config's API key (prefer gpt-4o if available)
+                    openai_key = ''
+                    for config in config_list:
+                        if config.get('model') == 'gpt-4o':
+                            openai_key = config.get('api_key', '')
+                            break
+                    # If no gpt-4o, use first one
+                    if not openai_key and config_list:
+                        openai_key = config_list[0].get('api_key', '')
+                    # Set in environment if valid
+                    if openai_key and openai_key.startswith('sk-') and len(openai_key) > 20:
+                        os.environ['OPENAI_API_KEY'] = openai_key
+                        st.session_state.api_configured = True
+    except Exception as e:
+        pass  # Silently fail
+
 # Sidebar
 with st.sidebar:
     st.markdown("## 💎 AriaWealth.ai")
