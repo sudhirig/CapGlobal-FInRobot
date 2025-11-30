@@ -45,95 +45,280 @@ st.set_page_config(
 # Custom CSS for beautiful styling
 st.markdown("""
 <style>
+    /* Import fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     /* Main styling */
     .stApp {
-        background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+        background: linear-gradient(180deg, #0a0a1a 0%, #111128 50%, #0a0a1a 100%);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Fix main content area */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1200px;
+    }
+    
+    /* Headers */
+    h1, h2, h3, h4 {
+        color: #ffffff !important;
+    }
+    
+    p, span, label {
+        color: #e0e0e0 !important;
     }
     
     .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #d946ef 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.5rem;
+        background-clip: text;
+        font-size: 2.8rem;
         font-weight: 700;
         text-align: center;
-        padding: 0.5rem 0;
-        margin-bottom: 0;
+        padding: 1rem 0;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
     }
     
     .sub-header {
         text-align: center;
-        color: #888;
+        color: #a0a0c0 !important;
+        font-size: 1.1rem;
         margin-top: 0;
         margin-bottom: 2rem;
+        font-weight: 400;
     }
     
     /* Sidebar styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        background: linear-gradient(180deg, #0f0f24 0%, #151532 100%);
+        border-right: 1px solid #2a2a4a;
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #e0e0e0 !important;
     }
     
     [data-testid="stSidebar"] .stRadio label {
-        color: #fff !important;
+        color: #ffffff !important;
+        font-weight: 500;
+    }
+    
+    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        color: #a855f7 !important;
     }
     
     /* Metric cards */
     [data-testid="stMetric"] {
-        background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
-        border-radius: 12px;
-        padding: 1rem;
-        border: 1px solid #3d3d7a;
+        background: linear-gradient(135deg, #1a1a35 0%, #252550 100%);
+        border-radius: 16px;
+        padding: 1.25rem;
+        border: 1px solid #3a3a6a;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     
     [data-testid="stMetric"] label {
-        color: #a0a0ff !important;
+        color: #a0a0d0 !important;
+        font-size: 0.9rem;
+        font-weight: 500;
     }
     
     [data-testid="stMetric"] [data-testid="stMetricValue"] {
-        color: #fff !important;
+        color: #ffffff !important;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    [data-testid="stMetric"] [data-testid="stMetricDelta"] {
+        font-weight: 600;
     }
     
     /* Buttons */
-    .stButton>button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+    .stButton > button {
+        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+        color: white !important;
         border: none;
-        border-radius: 8px;
-        padding: 0.5rem 2rem;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
         font-weight: 600;
+        font-size: 1rem;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
     }
     
-    .stButton>button:hover {
+    .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+        background: linear-gradient(135deg, #8b5cf6 0%, #c084fc 100%);
+    }
+    
+    .stButton > button:active {
+        transform: translateY(0);
     }
     
     /* Text inputs */
     .stTextInput input {
-        background: #1e1e3f;
-        border: 1px solid #3d3d7a;
+        background: #1a1a35 !important;
+        border: 2px solid #3a3a6a !important;
+        border-radius: 10px;
+        color: #ffffff !important;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .stTextInput input:focus {
+        border-color: #7c3aed !important;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+    
+    /* Select boxes */
+    .stSelectbox > div > div {
+        background: #1a1a35 !important;
+        border: 2px solid #3a3a6a !important;
+        border-radius: 10px;
+        color: #ffffff !important;
+    }
+    
+    /* Number inputs */
+    .stNumberInput input {
+        background: #1a1a35 !important;
+        border: 2px solid #3a3a6a !important;
+        border-radius: 10px;
+        color: #ffffff !important;
+    }
+    
+    /* Date inputs */
+    .stDateInput input {
+        background: #1a1a35 !important;
+        border: 2px solid #3a3a6a !important;
+        border-radius: 10px;
+        color: #ffffff !important;
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background: #1a1a35;
+        border-radius: 12px;
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: transparent;
+        color: #a0a0c0 !important;
         border-radius: 8px;
-        color: #fff;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important;
+        color: #ffffff !important;
     }
     
     /* Expanders */
     .streamlit-expanderHeader {
-        background: #1e1e3f;
-        border-radius: 8px;
+        background: #1a1a35 !important;
+        border-radius: 12px;
+        color: #ffffff !important;
+        font-weight: 500;
     }
     
-    /* Tables */
+    .streamlit-expanderContent {
+        background: #151530 !important;
+        border: 1px solid #2a2a4a;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    /* Info/Warning/Error boxes */
+    .stAlert {
+        background: #1a1a35 !important;
+        border: 1px solid #3a3a6a;
+        border-radius: 12px;
+        color: #e0e0e0 !important;
+    }
+    
+    [data-testid="stAlert"] {
+        padding: 1rem 1.25rem;
+    }
+    
+    /* DataFrames */
     .stDataFrame {
         border-radius: 12px;
         overflow: hidden;
+        border: 1px solid #3a3a6a;
     }
     
-    /* Info boxes */
-    .stAlert {
-        background: #1e1e3f;
-        border: 1px solid #3d3d7a;
+    /* Chat messages */
+    .stChatMessage {
+        background: #1a1a35 !important;
+        border-radius: 12px;
+        border: 1px solid #2a2a4a;
+    }
+    
+    /* Spinners */
+    .stSpinner > div {
+        border-color: #7c3aed !important;
+    }
+    
+    /* Markdown text */
+    .stMarkdown {
+        color: #e0e0e0;
+    }
+    
+    /* Code blocks */
+    code {
+        background: #1a1a35 !important;
+        color: #a855f7 !important;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+    }
+    
+    /* Download buttons */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white !important;
+    }
+    
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    }
+    
+    /* Radio buttons in sidebar */
+    [data-testid="stSidebar"] .stRadio > div {
+        gap: 0.5rem;
+    }
+    
+    [data-testid="stSidebar"] .stRadio label {
+        padding: 0.6rem 1rem;
         border-radius: 8px;
+        transition: background 0.2s ease;
+    }
+    
+    [data-testid="stSidebar"] .stRadio label:hover {
+        background: rgba(124, 58, 237, 0.2);
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #0a0a1a;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #3a3a6a;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #5a5a8a;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -467,10 +652,12 @@ elif page == "🧠 AI Investment Team":
     
     with col1:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); 
-                    padding: 1.5rem; border-radius: 12px; text-align: center;">
-            <h3 style="color: #4da6ff;">📊 Market Analyst</h3>
-            <p style="color: #a0c4e8; font-size: 0.9rem;">
+        <div style="background: linear-gradient(145deg, #1a365d 0%, #234876 100%); 
+                    padding: 2rem 1.5rem; border-radius: 16px; text-align: center;
+                    border: 1px solid #3182ce; box-shadow: 0 8px 32px rgba(49, 130, 206, 0.2);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📊</div>
+            <h3 style="color: #63b3ed; margin: 0 0 0.75rem 0; font-size: 1.3rem; font-weight: 600;">Market Analyst</h3>
+            <p style="color: #bee3f8; font-size: 0.95rem; line-height: 1.5; margin: 0;">
             Analyzes market trends, news sentiment, and price movements
             </p>
         </div>
@@ -478,10 +665,12 @@ elif page == "🧠 AI Investment Team":
     
     with col2:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #1e5f3a 0%, #2d8757 100%); 
-                    padding: 1.5rem; border-radius: 12px; text-align: center;">
-            <h3 style="color: #4dff6a;">💰 Fundamental Analyst</h3>
-            <p style="color: #a0e8c4; font-size: 0.9rem;">
+        <div style="background: linear-gradient(145deg, #1a4d3e 0%, #236348 100%); 
+                    padding: 2rem 1.5rem; border-radius: 16px; text-align: center;
+                    border: 1px solid #38a169; box-shadow: 0 8px 32px rgba(56, 161, 105, 0.2);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">💰</div>
+            <h3 style="color: #68d391; margin: 0 0 0.75rem 0; font-size: 1.3rem; font-weight: 600;">Fundamental Analyst</h3>
+            <p style="color: #c6f6d5; font-size: 0.95rem; line-height: 1.5; margin: 0;">
             Reviews financial statements, valuations, and business fundamentals
             </p>
         </div>
@@ -489,10 +678,12 @@ elif page == "🧠 AI Investment Team":
     
     with col3:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #5f1e3a 0%, #872d5a 100%); 
-                    padding: 1.5rem; border-radius: 12px; text-align: center;">
-            <h3 style="color: #ff4da6;">📈 Technical Analyst</h3>
-            <p style="color: #e8a0c4; font-size: 0.9rem;">
+        <div style="background: linear-gradient(145deg, #4a1d5e 0%, #5e2876 100%); 
+                    padding: 2rem 1.5rem; border-radius: 16px; text-align: center;
+                    border: 1px solid #9f7aea; box-shadow: 0 8px 32px rgba(159, 122, 234, 0.2);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📈</div>
+            <h3 style="color: #b794f4; margin: 0 0 0.75rem 0; font-size: 1.3rem; font-weight: 600;">Technical Analyst</h3>
+            <p style="color: #e9d8fd; font-size: 0.95rem; line-height: 1.5; margin: 0;">
             Studies charts, patterns, and technical indicators
             </p>
         </div>
@@ -502,11 +693,13 @@ elif page == "🧠 AI Investment Team":
     
     # CIO card
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #4a1e5f 0%, #6a2d87 100%); 
-                padding: 1.5rem; border-radius: 12px; text-align: center; margin: 1rem 0;">
-        <h3 style="color: #b44dff;">👔 Chief Investment Officer (CIO)</h3>
-        <p style="color: #d4a0e8; font-size: 0.9rem;">
-        Coordinates all analysts, integrates their findings, and makes the final investment recommendation
+    <div style="background: linear-gradient(145deg, #1a1a40 0%, #2d2d60 100%); 
+                padding: 2rem; border-radius: 16px; text-align: center; margin: 1rem 0;
+                border: 2px solid #a855f7; box-shadow: 0 8px 40px rgba(168, 85, 247, 0.25);">
+        <div style="font-size: 3rem; margin-bottom: 0.75rem;">👔</div>
+        <h3 style="color: #c084fc; margin: 0 0 0.75rem 0; font-size: 1.5rem; font-weight: 700;">Chief Investment Officer (CIO)</h3>
+        <p style="color: #e9d5ff; font-size: 1rem; line-height: 1.6; margin: 0; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Coordinates all analysts, integrates their findings, and delivers the final investment recommendation
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -912,9 +1105,16 @@ Based on current metrics:
 # Footer
 st.markdown("---")
 st.markdown("""
-<div style="text-align: center; color: #888; padding: 1.5rem;">
-    <p style="font-size: 1.1rem;">💎 <strong>AriaWealth.ai</strong>™</p>
-    <p style="font-size: 0.9rem; color: #a0a0ff;">Powered by ARIA™</p>
-    <p style="font-size: 0.7rem; margin-top: 0.5rem;">Data from YFinance, Finnhub, SEC | AI by OpenAI</p>
+<div style="text-align: center; padding: 2rem 1rem; margin-top: 2rem; 
+            border-top: 1px solid #2a2a4a; background: linear-gradient(180deg, transparent 0%, #0a0a15 100%);">
+    <p style="font-size: 1.3rem; margin: 0 0 0.5rem 0; color: #c084fc;">
+        💎 <strong>AriaWealth.ai</strong>™
+    </p>
+    <p style="font-size: 1rem; margin: 0 0 0.75rem 0; color: #a855f7; font-weight: 500;">
+        Powered by ARIA™
+    </p>
+    <p style="font-size: 0.85rem; margin: 0; color: #6b7280;">
+        Data: YFinance, Finnhub, SEC-API | AI: OpenAI GPT-4 | Framework: AutoGen
+    </p>
 </div>
 """, unsafe_allow_html=True)
