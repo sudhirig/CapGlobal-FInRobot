@@ -34,6 +34,18 @@
 [![](https://dcbadge.limes.pink/api/server/trsr8SXpW5)](https://discord.gg/trsr8SXpW5)
 
 
+## 🚀 Quick Deploy on Replit
+
+**Want to try FinRobot instantly?** Deploy on Replit with one click:
+
+1. **Import this repository** to Replit
+2. **Set API keys** in Replit Secrets (see [REPLIT_README.md](REPLIT_README.md))
+3. **Click Run** - The Streamlit interface will start automatically!
+
+📖 **Full Replit setup guide**: See [REPLIT_README.md](REPLIT_README.md) for detailed instructions, troubleshooting, and configuration.
+
+---
+
 ## FinRobot Ecosystem
 <div align="center">
 <img align="center" src="https://github.com/AI4Finance-Foundation/FinRobot/assets/31713746/6b30d9c1-35e5-4d36-a138-7e2769718f62" width="90%"/>
