@@ -560,6 +560,34 @@ elif page == "🤖 AI Chat":
     if not st.session_state.api_configured:
         st.warning("⚠️ Please configure your API keys in the sidebar to use the AI Chat feature.")
     
+    # Show welcome message if chat is empty
+    if not st.session_state.chat_history:
+        with st.chat_message("assistant"):
+            welcome_msg = """👋 Hello! I'm **ARIA**, your AI Financial Analyst from AriaWealth.ai powered by GPT-4o. 
+
+I can help you with:
+
+📊 **Stock Analysis** - Ask about any stock ticker
+> *Example: "Tell me about AAPL" or "What's NVDA's current price?"*
+
+📈 **Market Insights** - Get current market data and trends
+> *Example: "How is MSFT performing?" or "Analyze TSLA"*
+
+💡 **Investment Information** - General financial guidance
+> *Example: "Compare GOOGL and META" or "What are the risks of investing in tech stocks?"*
+
+🔍 **Financial Data** - Real-time prices, financials, news, and more
+> *Example: "What's Apple's PE ratio?" or "Show me recent news about Microsoft"*
+
+**Try asking me:**
+- "What is the current price of NVDA?"
+- "Tell me about Apple stock"
+- "Analyze Microsoft for me"
+- "Compare the financials of GOOGL and META"
+
+*I have access to real-time financial data through YFinance, Finnhub, and SEC-API.*"""
+            st.markdown(welcome_msg)
+    
     # Display chat history
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
